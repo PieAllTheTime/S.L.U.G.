@@ -1,0 +1,44 @@
+using UnityEngine;
+
+public class Interactable : MonoBehaviour
+{
+    // Range to be interacted with
+    public float radius = 3f;   
+
+    // Default interaction
+    private bool hasInteracted = false;
+    
+    public Transform player;
+    
+    //------------------------------------------------------------//
+    void Update()
+    { 
+        // Compares distance betwen player and intereactable, if so, sets condition hasInteracted to 'true' and initiates 'Interact'
+            float distance = Vector3.Distance(player.position, transform.position);
+            if (distance <= radius)
+            {
+            Debug.Log("Intereacting with " + transform.name);
+                hasInteracted = true;
+                Interact();
+
+            }
+    }
+
+    // If the interactable has been interacted with, the player will seemingly 'pick up' the object
+    private void Interact()
+    {
+        if (hasInteracted = true)
+        {
+            Debug.Log("Let's pick this up!");
+            Destroy(gameObject);
+            // When game object disappears, add it to player's inventory
+        }
+    }
+
+    // Shows radius in editor
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, radius);
+    }
+}
