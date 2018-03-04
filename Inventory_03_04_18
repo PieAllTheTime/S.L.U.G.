@@ -1,0 +1,51 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Inventory : MonoBehaviour
+{
+    #region Singleton
+
+    public static Inventory instance;
+
+    
+
+    void Awake()
+    {
+        if (instance != null)
+        {
+            Debug.LogWarning("More than one instance of Inventory found!");
+            return;
+        }
+        instance = this;
+    }
+
+    #endregion
+
+    // If you end up needing to switch inventory items, continue here:
+    // https://youtu.be/HQNl3Ff2Lpo?t=13m9s
+  
+    public int space = 25;
+
+    public List<Item> items = new List<Item>();
+
+    public bool Add (Item item)
+    {
+        if (!item.isDefaultItem)
+        {
+            if (items.Count >= space)
+            {
+                Debug.Log("Not enough room.");
+                return false;
+            }
+            items.Add(item);
+        }
+        return true;
+    }
+
+    public void Remove(Item item)
+    {
+        items.Remove(item);
+    }
+
+}
