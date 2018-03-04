@@ -1,0 +1,70 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CameraControls : MonoBehaviour
+{
+    // References
+    public Camera cam;
+    public Transform player, centerPoint;
+
+
+    // Zoom variables
+    private float zoom;
+    public float zoomSpeed = 2;
+    public float zoomMin = -2f;
+    public float zoomMax = -10f;
+
+    // Mouse camera controls
+    private float mouseX, mouseY;
+    public float mouseSensitivity = 10f;
+    public float mouseYPosition = 1f;
+    
+    //--------------------------------------------------------------------//
+
+    void Start()
+    {
+        zoom = -5;
+
+        Cursor.visible = false;
+    }
+
+      void Update()
+    {
+        // Zoom controls
+        zoom += Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
+
+        if (zoom > zoomMin)
+            zoom = zoomMin;
+        
+        if (zoom < zoomMax)
+            zoom = zoomMax;
+
+        cam.transform.localPosition = new Vector3(0, 0, zoom);
+
+        // Mouse Orbiting
+        if (Input.GetAxis("Mouse X") != 0)
+
+        {
+            // Cam moves with mouse
+            mouseX += Input.GetAxis("Mouse X");
+            mouseY += Input.GetAxis("Mouse Y");
+        }
+
+        // Allows cam to look around without being unrealistic
+        mouseY = Mathf.Clamp(mouseY, -60, 60);
+        cam.transform.LookAt(centerPoint);
+        centerPoint.localRotation =
+            Quaternion.Euler(mouseY, mouseX, 0); //Not Vector3, rotations always use quarternions
+
+        // Lerps zoom to inside player's head when coliding with objects/terrain
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 3))
+          {
+            cam.transform.position = Vector3.Lerp(player.transform.position, player.transform.position, 3f);
+            }
+
+    }
+}
