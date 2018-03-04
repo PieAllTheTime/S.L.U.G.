@@ -1,44 +1,51 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class Interactable : MonoBehaviour
+public class Inventory : MonoBehaviour
 {
-    // Range to be interacted with
-    public float radius = 3f;   
+    #region Singleton
 
-    // Default interaction
-    private bool hasInteracted = false;
+    public static Inventory instance;
+
     
-    public Transform player;
-    
-    //------------------------------------------------------------//
-    void Update()
-    { 
-        // Compares distance betwen player and intereactable, if so, sets condition hasInteracted to 'true' and initiates 'Interact'
-            float distance = Vector3.Distance(player.position, transform.position);
-            if (distance <= radius)
-            {
-            Debug.Log("Intereacting with " + transform.name);
-                hasInteracted = true;
-                Interact();
 
-            }
-    }
-
-    // If the interactable has been interacted with, the player will seemingly 'pick up' the object
-    private void Interact()
+    void Awake()
     {
-        if (hasInteracted = true)
+        if (instance != null)
         {
-            Debug.Log("Let's pick this up!");
-            Destroy(gameObject);
-            // When game object disappears, add it to player's inventory
+            Debug.LogWarning("More than one instance of Inventory found!");
+            return;
         }
+        instance = this;
     }
 
-    // Shows radius in editor
-    void OnDrawGizmosSelected()
+    #endregion
+
+    // If you end up needing to switch inventory items, continue here:
+    // https://youtu.be/HQNl3Ff2Lpo?t=13m9s
+  
+    public int space = 25;
+
+    public List<Item> items = new List<Item>();
+
+    public bool Add (Item item)
     {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, radius);
+        if (!item.isDefaultItem)
+        {
+            if (items.Count >= space)
+            {
+                Debug.Log("Not enough room.");
+                return false;
+            }
+            items.Add(item);
+        }
+        return true;
     }
+
+    public void Remove(Item item)
+    {
+        items.Remove(item);
+    }
+
 }
