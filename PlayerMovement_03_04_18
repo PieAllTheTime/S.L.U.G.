@@ -1,0 +1,116 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+
+public class Movement : MonoBehaviour
+{
+    public Transform character, centerPoint;
+
+    // Raycast for interaction
+    public GameObject raycastObject;
+
+    // Movement variables
+    private float moveFB, moveLR, vertVelocity;
+    public float moveSpeed = 2f;
+    public float jumpForce = 4f;
+
+    // Speed of camera roation pan
+    public float rotationSpeed = 5f;
+
+    // Mouse camera controls
+    private float mouseX, mouseY;
+    public float mouseSensitivity = 10f;
+    public float mouseYPosition = 1f;
+
+    // Camera ray references
+    private CharacterController player;
+    private Interactable interactable;
+    private Camera cam;
+
+    // Jump
+    private bool hasJumped;
+
+    //-----------------------------------------------------------------//
+    
+    void Start()
+    {
+        player = GetComponent<CharacterController>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        ApplyGravity();
+        CheckForHit();
+
+        // Playermovement
+        moveFB = Input.GetAxis("Vertical") * moveSpeed;
+        moveLR = Input.GetAxis("Horizontal") * moveSpeed;
+
+        Vector3 movement = new Vector3(moveLR, vertVelocity, moveFB);
+        movement = character.rotation * movement;
+
+
+        character.GetComponent<CharacterController>().Move(movement * Time.deltaTime);
+        centerPoint.position =
+            new Vector3(character.position.x, character.position.y + mouseYPosition, character.position.z);
+
+        if (Input.GetAxis("Vertical") > 0 | Input.GetAxis("Vertical") < 0)
+        {
+            Quaternion turnAngle = Quaternion.Euler(0, centerPoint.eulerAngles.y, 0);
+
+            character.rotation = Quaternion.Slerp(character.rotation, turnAngle, Time.deltaTime * rotationSpeed);
+        }
+
+        // Jump controls
+        if (Input.GetButtonDown("Jump"))
+        {
+            hasJumped = true;
+        }
+    }
+
+
+    // Interactable reference
+    void CheckForHit()
+    {
+        RaycastHit objectHit;
+
+        Vector3 fwd = raycastObject.transform.TransformDirection(Vector3.forward);
+       if (Physics.Raycast(raycastObject.transform.position, fwd, out objectHit, 3))
+       {
+          Interactable interactable = objectHit.collider.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                // Currently, this line is used to determine whether the player is interacting with an interactable item or something else. Right now there is nothing else.
+                // Debug.Log("We hit an Item!"); 
+            }
+       }
+    }
+    
+    // Application of gravity and jump function
+    private void ApplyGravity()
+        {
+            if (player.isGrounded == true)
+            {
+                if (hasJumped == false)
+                {
+                    vertVelocity = Physics.gravity.y;
+                }
+                else
+                {
+                    vertVelocity = jumpForce;
+                }
+            }
+            else
+            {
+                vertVelocity += Physics.gravity.y * Time.deltaTime;
+                vertVelocity = Mathf.Clamp(vertVelocity, -50f, jumpForce);
+                hasJumped = false;
+            }
+        }
+    }
+
+
+
